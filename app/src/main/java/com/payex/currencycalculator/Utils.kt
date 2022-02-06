@@ -11,11 +11,15 @@ class Utils {
     companion object {
         fun calculate(
             value: BigDecimal,
-            exchangeRate: BigDecimal,
+            exchangeRate: Double,
+            fromCurrency: String = "NOK",
             scale: Int = 4,
             roundingMode: RoundingMode = RoundingMode.HALF_DOWN
         ): BigDecimal {
-            return value.multiply(exchangeRate).setScale(scale, roundingMode)
+            if (exchangeRate.equals(0)) return BigDecimal.ZERO
+            if (fromCurrency == "USD") return value.multiply(BigDecimal(exchangeRate))
+                .setScale(scale, roundingMode)
+            return value.divide(BigDecimal(exchangeRate), scale, roundingMode)
         }
 
         fun getFormattedCurrentDate(): String {

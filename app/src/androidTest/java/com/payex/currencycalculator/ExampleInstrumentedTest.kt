@@ -21,4 +21,10 @@ class ExampleInstrumentedTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.payex.currencycalculator", appContext.packageName)
     }
+    @Test
+    fun test_andre_ting () {
+        // Context of the app under test.
+        val appContext = InstrumentationRegistry.getInstrumentation() .targetContext
+        assertEquals("com.payex.currencycalculator", appContext.packageName)
+    }
 }

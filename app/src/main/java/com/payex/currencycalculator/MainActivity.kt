@@ -8,23 +8,30 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.get
 import com.payex.currencycalculator.Utils.Companion.calculate
 import com.payex.currencycalculator.Utils.Companion.getFormattedCurrentDate
 import kotlinx.android.synthetic.main.activity_main.*
 import java.math.BigDecimal
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
     val defaultCurrencyFrom: Currency = Currency.getInstance("NOK")
     val defaultCurrencTo = Currency.getInstance("USD")
+    val defaultUrl =
+        "https://data.norges-bank.no/api/data/EXR/B.USD.NOK.SP?format=sdmx-generic-2.1&amp;lastNObservations=1&amp;locale=en"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         loadSpinner(R.id.spinnerFrom, defaultCurrencyFrom);
         loadSpinner(R.id.spinnerTo, defaultCurrencTo)
-        listenToTextChanging()
+
+        val obs =Obs(defaultUrl, defaultExchangeRate)
+        // TODO check out
+        val response = ExchangeRateClient().run(defaultUrl)
+        /*obs = response?.let { inputStream ->
+            XmlParser().parse(inputStream).findLast { it.obsDimension == getFormattedCurrentDate() }
+        }!!*/
+        listenToTextChanging(obs)
     }
 
     private fun loadSpinner(spinnerId: Int, defaultCurrency: Currency) {
@@ -46,9 +53,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun listenToTextChanging() {
+    private fun listenToTextChanging(obs: Obs) {
         val result: TextView = findViewById(R.id.textViewResult)
-        result.text = "im ready"
         editTextInputConvertingValue.addTextChangedListener(object : TextWatcher {
 
             override fun afterTextChanged(s: Editable) {}
@@ -65,7 +71,8 @@ class MainActivity : AppCompatActivity() {
             ) {
                 calculate(
                     BigDecimal(editTextInputConvertingValue.text.toString()),
-                    BigDecimal("0.1")
+                    obs.obsValue,
+                    spinnerFrom.selectedItem.toString()
                 ).toString().also {
                     result.text = editTextInputConvertingValue.text.toString() +
                             " equals " + it + spinnerTo.selectedItem.toString() + ", on the date " + getFormattedCurrentDate()
